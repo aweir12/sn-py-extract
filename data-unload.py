@@ -19,6 +19,7 @@ import requests
 
 # Local Variables
 fetchSize = 500 # How many records to retrieve at once from the API
+tableMapping = pd.read_csv('snTables.csv')
 queryPt1 = 'sys_updated_on>javascript:gs.dateGenerate('
 lastUpdateDate = "'2012-01-01','12:00:00'"
 queryPt2 = ')^ORDERBYsys_updated_on'
@@ -126,9 +127,11 @@ def unloadData(snTableIn, dbTableIn):
     return dfOut
 
 
-# In[12]:
+# In[15]:
 
 
-dev = unloadData('sys_user', 'arw_sys_user')
-dev[0].to_sql('arw_sys_user',engine,chunksize=1500,if_exists='append', dtype=dev[1])
+for index, row in tableMapping.iterrows():
+    print("Loading Table: " + row['targetTableName'] + '... from: ' + row['snTableName'])
+    snData = unloadData(row['snTableName'], row['targetTableName'])
+    snData[0].to_sql(row['targetTableName'], engine, chunksize = 1500, if_exists = 'append', dtype = snData[1])
 
