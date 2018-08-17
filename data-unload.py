@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[19]:
 
 
 import pandas as pd
@@ -15,7 +15,7 @@ import requests
 import cx_Oracle
 
 
-# In[2]:
+# In[20]:
 
 
 # Local Variables
@@ -31,7 +31,7 @@ qStr = {'sysparm_exclude_reference_link' : 'true',
         'sysparm_offset': 0}
 
 
-# In[3]:
+# In[21]:
 
 
 # Global Variables
@@ -42,7 +42,7 @@ snHeaders = params.snHeaders
 connection = params.dbURL + ulp.urlencode(params.dbParams)
 
 
-# In[4]:
+# In[22]:
 
 
 # Create Oracle Connections
@@ -51,7 +51,7 @@ db = cx_Oracle.connect(params.cx_UN, params.cx_PW, params.cx_SN)
 db.autocommit = True
 
 
-# In[5]:
+# In[23]:
 
 
 # Retrieve Date/Time of the Newest Record in the Database for a Table
@@ -64,7 +64,7 @@ def getLastRefreshDate(dbTableIn):
     return lastUpdateDate
 
 
-# In[6]:
+# In[24]:
 
 
 # Build the URL Call for the ServiceNow Table API
@@ -78,7 +78,7 @@ def buildURL(snTableIn, lastUpdateDateIn, offsetIn=0):
     return urlCall
 
 
-# In[7]:
+# In[25]:
 
 
 # Determine Column Types for Oracle DB
@@ -110,7 +110,7 @@ def dfReShape(dfIn):
     return out
 
 
-# In[8]:
+# In[26]:
 
 
 # Unload the ServiceNow Data & Shape the DF
@@ -136,7 +136,7 @@ def unloadData(snTableIn, dbTableIn):
     return dfOut
 
 
-# In[9]:
+# In[27]:
 
 
 for index, row in tableMapping.iterrows():
