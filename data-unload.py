@@ -12,6 +12,7 @@ import params
 from sqlalchemy import create_engine
 import sqlalchemy.types
 import requests
+import cx_Oracle
 
 
 # In[2]:
@@ -39,10 +40,18 @@ username = params.username
 password = params.password
 snHeaders = params.snHeaders
 connection = params.dbURL + ulp.urlencode(params.dbParams)
-engine = create_engine(connection) # Create Database Engine
 
 
 # In[4]:
+
+
+# Create Oracle Connections
+engine = create_engine(connection) # Create Database Engine
+db = cx_Oracle.connect(params.cx_UN, params.cx_PW, params.cx_SN)
+db.autocommit = True
+
+
+# In[5]:
 
 
 # Retrieve Date/Time of the Newest Record in the Database for a Table
@@ -55,7 +64,7 @@ def getLastRefreshDate(dbTableIn):
     return lastUpdateDate
 
 
-# In[5]:
+# In[6]:
 
 
 # Build the URL Call for the ServiceNow Table API
@@ -69,7 +78,7 @@ def buildURL(snTableIn, lastUpdateDateIn, offsetIn=0):
     return urlCall
 
 
-# In[6]:
+# In[7]:
 
 
 # Determine Column Types for Oracle DB
@@ -101,7 +110,7 @@ def dfReShape(dfIn):
     return out
 
 
-# In[7]:
+# In[8]:
 
 
 # Unload the ServiceNow Data & Shape the DF
@@ -127,11 +136,15 @@ def unloadData(snTableIn, dbTableIn):
     return dfOut
 
 
-# In[15]:
+# In[9]:
 
 
 for index, row in tableMapping.iterrows():
     print("Loading Table: " + row['targetTableName'] + '... from: ' + row['snTableName'])
     snData = unloadData(row['snTableName'], row['targetTableName'])
     snData[0].to_sql(row['targetTableName'], engine, chunksize = 1500, if_exists = 'append', dtype = snData[1])
+    cursor = db.cursor()
+    cursor.callproc("DROP_DUPS", [row['targetTableName']])
+    cursor.callproc("DROP_OLD", [row['targetTableName']])
+    cursor.close()
 
